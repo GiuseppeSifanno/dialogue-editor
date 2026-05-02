@@ -2,25 +2,26 @@ import { useEffect, useState } from "react";
 import NodeList from "./components/NodeList";
 import NodeEditor from "./components/NodeEditor";
 import Preview from "./components/Preview";
-import 'bootstrap/dist/css/bootstrap.min.css'
 
 // Prova a caricare i nodi salvati in precedenza
-const savedNodes = localStorage.getItem('dialogueNodes')
+const savedNodes = localStorage.getItem("dialogueNodes");
 
 // Se ci sono dati salvati, usali; altrimenti, usa i nodi di esempio
-const initialNodes = savedNodes ? JSON.parse(savedNodes) : [
-	{
-		id: 1,
-		char: "Eroe",
-		text: "Ciao, ho bisogno di aiuto.",
-		choices: [
-			{ text: "Compro qualcosa", targetId: 2 },
-			{ text: "Niente grazie", targetId: 3 },
-		],
-	},
-	{ id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [] },
-	{ id: 3, char: "Guardia", text: "Alt! Documenti.", choices: [] },
-];
+const initialNodes = savedNodes
+	? JSON.parse(savedNodes)
+	: [
+			{
+				id: 1,
+				char: "Eroe",
+				text: "Ciao, ho bisogno di aiuto.",
+				choices: [
+					{ text: "Compro qualcosa", targetId: 2 },
+					{ text: "Niente grazie", targetId: 3 },
+				],
+			},
+			{ id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [] },
+			{ id: 3, char: "Guardia", text: "Alt! Documenti.", choices: [] },
+		];
 
 function App() {
 	const [nodes, setNodes] = useState(initialNodes);
@@ -29,10 +30,10 @@ function App() {
 
 	const selectedNode = nodes.find((n) => n.id === selectedId);
 
-  // Salva i nodi in localStorage ogni volta che cambiano
-  useEffect(() => {
-    localStorage.setItem('dialogueNodes', JSON.stringify(nodes));
-  }, [nodes]);
+	// Salva i nodi in localStorage ogni volta che cambiano
+	useEffect(() => {
+		localStorage.setItem("dialogueNodes", JSON.stringify(nodes));
+	}, [nodes]);
 
 	function handleUpdate(updatedNode) {
 		setNodes((prev) =>
@@ -59,7 +60,7 @@ function App() {
 		setSelectedId(remaining[0]?.id || null);
 	}
 
-  function handleExport() {
+	function handleExport() {
 		const json = JSON.stringify(nodes, null, 2);
 		const blob = new Blob([json], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
@@ -83,25 +84,54 @@ function App() {
 	}
 
 	return (
-		<div style={{ padding: "24px" }}>
-			<h1>Dialogue Editor</h1>
-			<button onClick={handleExport}>⬇ Esporta JSON</button>
-			<label
-				style={{
-					cursor: "pointer",
-					border: "1px solid #ccc",
-					padding: "4px 10px",
-					borderRadius: "6px",
-				}}
-			>
-				Importa JSON
-				<input
-					type="file"
-					accept=".json"
-					onChange={handleImport}
-					style={{ display: "none" }}
-				/>
-			</label>
+		<div className="bg-black text-white container-fluid min-vh-100">
+			<nav className="navbar navbar-expand-sm bg-body-tertiary mb-4">
+				<div className="container-fluid">
+					<div className="w-50">
+						<p className="h2 mb-0 text-black">Dialog Editor</p>
+					</div>
+
+					<button
+						className="navbar-toggler"
+						type="button"
+						data-bs-toggle="collapse"
+						data-bs-target="#navbarSupportedContent"
+						aria-controls="navbarSupportedContent"
+						aria-expanded="false"
+						aria-label="Toggle navigation"
+					>
+						<span className="navbar-toggler-icon"></span>
+					</button>
+					<div
+						className="collapse navbar-collapse d-flex align-items-center justify-content-end w-auto"
+						id="navbarSupportedContent"
+					>
+						<ul className="navbar-nav column-gap-3">
+							<li className="nav-item position">
+								<button className="btn btn-outline-success position-relative overflow-hidden">
+									Importa JSON
+									<input
+										type="file"
+										accept=".json"
+										onChange={handleImport}
+										style={{ display: "none" }}
+									/>
+								</button>
+							</li>
+
+							<li className="nav-item">
+                <i className="bi bi-upload"></i>
+								<button
+									className="btn btn-light btn-outline-success"
+									onClick={handleExport}
+								>
+									Esporta JSON
+								</button>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</nav>
 
 			<div style={{ display: "flex", gap: "24px" }}>
 				<NodeList
