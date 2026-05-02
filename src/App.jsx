@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import NodeList from "./components/NodeList";
 import NodeEditor from "./components/NodeEditor";
 import Preview from "./components/Preview";
-
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 // Prova a caricare i nodi salvati in precedenza
 const savedNodes = localStorage.getItem('dialogueNodes')
