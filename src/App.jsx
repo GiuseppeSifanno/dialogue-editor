@@ -4,10 +4,13 @@ import NodeEditor from "./components/NodeEditor";
 import Preview from "./components/Preview";
 
 const initialNodes = [
-  { id: 1, char: "Eroe", text: "Ciao, ho bisogno di aiuto.", choices: [{ text: '', id: '' }] },
-  { id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [{ text: '', id: '' }] },
-  { id: 3, char: "Guardia", text: "Alt! Documenti.", choices: [{ text: '', id: '' }] },
-];
+  { id: 1, char: 'Eroe',     text: 'Ciao, ho bisogno di aiuto.', choices: [
+    { text: 'Compro qualcosa', targetId: 2 },
+    { text: 'Niente grazie',   targetId: 3 },
+  ]},
+  { id: 2, char: 'Mercante', text: 'Cosa posso fare per te?',    choices: [] },
+  { id: 3, char: 'Guardia',  text: 'Alt! Documenti.',            choices: [] },
+]
 
 function App() {
   const [nodes, setNodes]           = useState(initialNodes);
@@ -49,6 +52,7 @@ function App() {
         <NodeEditor
           key={selectedId}
           node={selectedNode}
+          nodes={nodes}
           onUpdate={handleUpdate}
         />
         <Preview nodes={nodes} />

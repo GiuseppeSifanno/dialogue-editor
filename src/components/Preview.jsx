@@ -3,12 +3,10 @@ import { useState } from 'react'
 function Preview({ nodes }) {
   const startNode = nodes[0]
   const [currentNode, setCurrentNode] = useState(startNode)
-  const [history, setHistory] = useState([startNode])
+  const [history, setHistory]         = useState([startNode])
 
-  function handleChoice(choiceText) {
-    // per ora andiamo al nodo successivo in ordine
-    const currentIndex = nodes.findIndex(n => n.id === currentNode.id)
-    const nextNode = nodes[currentIndex + 1]
+  function handleChoice(targetId) {
+    const nextNode = nodes.find(n => n.id === targetId)
     if (nextNode) {
       setCurrentNode(nextNode)
       setHistory(prev => [...prev, nextNode])
@@ -16,8 +14,8 @@ function Preview({ nodes }) {
   }
 
   function handleRestart() {
-    setCurrentNode(startNode)
-    setHistory([startNode])
+    setCurrentNode(nodes[0])
+    setHistory([nodes[0]])
   }
 
   return (
@@ -39,8 +37,12 @@ function Preview({ nodes }) {
       {currentNode.choices.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           {currentNode.choices.map((choice, i) => (
-            <button key={i} onClick={() => handleChoice(choice)}>
-              {choice}
+            <button
+              key={i}
+              onClick={() => handleChoice(choice.targetId)}
+              disabled={!choice.targetId}
+            >
+              {choice.text}
             </button>
           ))}
         </div>

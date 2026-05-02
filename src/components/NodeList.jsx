@@ -32,7 +32,7 @@ function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
               node.choices.length > 0 && (
                 node.choices.map((c, i) => (
                   <p key={i} style={{ margin: 0, fontSize: '12px', color: '#999' }}>
-                    {c}
+                    {c.text}
                   </p>
                 ))
               )
