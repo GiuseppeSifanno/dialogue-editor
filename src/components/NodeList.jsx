@@ -2,28 +2,50 @@ import NodeConnector from "./NodeConnector";
 
 function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
   return (
-    <div style={{ minWidth: '220px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Nodi</h2>
-        <button onClick={onAdd}>+ aggiungi</button>
+    <div className="d-flex flex-column">
+      <div className="d-flex justify-content-end align-items-center mb-3">
+        <button 
+          type="button" 
+          className="btn btn-primary" 
+          data-bs-toggle="button" 
+          aria-pressed="false" 
+          onClick={onAdd}
+        >
+          aggiungi
+        </button>
       </div>
 
       {nodes.map(node => (
         <div
           key={node.id}
+          className="d-flex p-2 rounded card w-auto h-auto"
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '8px',
-            marginBottom: '6px',
+            cursor: 'pointer',
             border: '1px solid #ccc',
             borderRadius: '6px',
-            cursor: 'pointer',
+            justifyContent: 'space-between',
             background: node.id === selectedId ? '#EEEDFE' : 'white',
           }}
         >
-          <div onClick={() => onSelect(node.id)} style={{ flex: 1 }}>
+          <div className="justify-content-end d-flex">
+              <button
+              type="button" 
+              className="btn btn-danger"
+              aria-pressed="false" 
+              data-bs-toggle="button"
+              cursor="pointer" 
+              value="delete"
+              onClick={() => onDelete(node.id)}
+            >
+              ✕
+            </button>
+          </div>
+          
+
+          <div 
+            onClick={() => onSelect(node.id)} style={{ flex: 1 }}
+            style={{ padding: '8px', border: 'none', background: 'transparent' }}  
+          >
             <strong>{node.char}</strong>
             <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>
               {node.text.length > 30 ? node.text.slice(0, 30) + '…' : node.text}
@@ -38,12 +60,6 @@ function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
               )
             }
           </div>
-          <button
-            onClick={() => onDelete(node.id)}
-            style={{ marginLeft: '8px', cursor: 'pointer' }}
-          >
-            ✕
-          </button>
         </div>
       ))}
     </div>

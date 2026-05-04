@@ -84,8 +84,8 @@ function App() {
 	}
 
 	return (
-		<div className="bg-black text-white container-fluid min-vh-100">
-			<nav className="navbar navbar-expand-sm bg-body-tertiary mb-4">
+		<div className="bg-dark text-white container-fluid min-vh-100 d-flex flex-column">
+			<nav className="navbar navbar-expand-sm bg-body-tertiary mb-4 rounded mt-3">
 				<div className="container-fluid">
 					<div className="w-50">
 						<p className="h2 mb-0 text-black">Dialog Editor</p>
@@ -120,7 +120,7 @@ function App() {
 							</li>
 
 							<li className="nav-item">
-                <i className="bi bi-upload"></i>
+								<i className="bi bi-upload"></i>
 								<button
 									className="btn btn-light btn-outline-success"
 									onClick={handleExport}
@@ -133,21 +133,29 @@ function App() {
 				</div>
 			</nav>
 
-			<div style={{ display: "flex", gap: "24px" }}>
-				<NodeList
-					nodes={nodes}
-					selectedId={selectedId}
-					onSelect={setSelectedId}
-					onAdd={handleAdd}
-					onDelete={handleDelete}
-				/>
-				<NodeEditor
-					key={selectedId}
-					node={selectedNode}
-					nodes={nodes}
-					onUpdate={handleUpdate}
-				/>
-				<Preview nodes={nodes} />
+			<div className="container-fluid bg-secondary rounded p-3 d-flex flex-row gap-5">
+				<div className="container-fluid d-flex flex-column flex-grow-1 gap-3">
+					<NodeList
+						nodes={nodes}
+						selectedId={selectedId}
+						onSelect={setSelectedId}
+						onAdd={handleAdd}
+						onDelete={handleDelete}
+					/>
+					<div>
+						<NodeEditor
+							key={selectedId}
+							node={selectedNode}
+							nodes={nodes}
+							onUpdate={handleUpdate}
+						/>
+					</div>
+					
+				</div>
+
+				<div className="d-flex flex-column">
+					<Preview nodes={nodes} />
+				</div>
 			</div>
 		</div>
 	);
