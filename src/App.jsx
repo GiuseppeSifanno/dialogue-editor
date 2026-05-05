@@ -30,10 +30,10 @@ function App() {
 
 	const selectedNode = nodes.find((n) => n.id === selectedId);
 
-	// Salva i nodi in localStorage ogni volta che cambiano
-	useEffect(() => {
+	// Salva i nodi in localStorage
+	function save(nodes) {
 		localStorage.setItem("dialogueNodes", JSON.stringify(nodes));
-	}, [nodes]);
+	}
 
 	function handleUpdate(updatedNode) {
 		setNodes((prev) =>
@@ -107,9 +107,18 @@ function App() {
 						id="navbarSupportedContent"
 					>
 						<ul className="navbar-nav column-gap-3">
+							<li className="nav-item">
+								<button
+									className="btn btn-light btn-outline-success"
+									onClick={save}
+								>
+									Salva
+								</button>
+							</li>
+
 							<li className="nav-item position">
 								<button className="btn btn-outline-success position-relative overflow-hidden">
-									Importa JSON
+									Importa
 									<input
 										type="file"
 										accept=".json"
@@ -125,7 +134,7 @@ function App() {
 									className="btn btn-light btn-outline-success"
 									onClick={handleExport}
 								>
-									Esporta JSON
+									Esporta
 								</button>
 							</li>
 						</ul>
