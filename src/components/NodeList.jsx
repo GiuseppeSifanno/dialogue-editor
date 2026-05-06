@@ -1,3 +1,4 @@
+import { end, start } from "@popperjs/core";
 import NodeConnector from "./NodeConnector";
 
 function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
@@ -27,7 +28,7 @@ function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
 							justifyContent: "space-between",
 							background: node.id === selectedId ? "#EEEDFE" : "white",
 							width: "350px",
-              minWidth: '250px'
+							minWidth: "250px",
 						}}
 					>
 						<div className="justify-content-end position-relative">
@@ -50,27 +51,37 @@ function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
 						<div
 							onClick={() => onSelect(node.id)}
 							style={{
-                flex: 1,
+								flex: 1,
 								padding: "8px",
 								border: "none",
 								background: "transparent",
 							}}
 						>
-							<h3 className="pt-4">{node.char}</h3>
+							<h3 className="pt-4 text-start">{node.char}</h3>
 							<h2 style={{ margin: 0, fontSize: "20px", color: "#666" }}>
 								{node.text.length > 30
 									? node.text.slice(0, 30) + "…"
 									: node.text}
 							</h2>
-							{node.choices.length > 0 &&
-								node.choices.map((c, i) => (
-									<p
-										key={i}
-										style={{ margin: 0, fontSize: "12px", color: "#999" }}
-									>
-										{c.text}
-									</p>
-								))}
+							<div className="container-fluid ms-3">
+								<ul className="list-group">
+									{node.choices.length > 0 &&
+										node.choices.map((c, i) => (
+											<li
+												key={i}
+												className="list-gruop-item border border-2 rounded-end-2 border-black mt-3 p-1"
+												style={{
+													margin: 0,
+													fontSize: "12px",
+													color: "#2e2e2e",
+													textAlign: start,
+												}}
+											>
+												{c.text}
+											</li>
+										))}
+								</ul>
+							</div>
 						</div>
 					</div>
 				))}
