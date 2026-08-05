@@ -1,9 +1,24 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 function Preview({ nodes }) {
-  const startNode = nodes[0]
-  const [currentNode, setCurrentNode] = useState(startNode)
-  const [history, setHistory]         = useState([startNode])
+  const [currentNode, setCurrentNode] = useState(nodes[0])
+  const [history, setHistory]         = useState([nodes[0]])
+
+  useEffect(() => {
+  const stillExists = nodes.find(n => n.id === currentNode?.id)
+  if (!stillExists) {
+    setCurrentNode(nodes[0])
+    setHistory([nodes[0]])
+  }}, [nodes])
+
+  
+  if (!nodes || nodes.length === 0){
+    return (
+      <div className="bg-body-tertiary rounded p-3 h-100 d-flex align-items-center justify-content-center">
+        <p className="text-muted mb-0">Nessun dialogo</p>
+      </div>
+    )
+  }
 
   function handleChoice(targetId) {
     const nextNode = nodes.find(n => n.id === targetId)
@@ -19,26 +34,29 @@ function Preview({ nodes }) {
   }
 
   return (
-    <div style={{ minWidth: '300px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Anteprima</h2>
-        <button onClick={handleRestart}>Ricomincia</button>
+    <div className="bg-body-tertiary rounded p-3 h-100 d-flex flex-column">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Anteprima</h5>
+        <button className="btn btn-outline-secondary btn-sm" onClick={handleRestart}>
+          Ricomincia
+        </button>
       </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+      {/* Storico messaggi */}
+      <div className="d-flex flex-column gap-2 mb-3 flex-grow-1 overflow-auto">
         {history.map((node, i) => (
-          <div key={i} style={{ padding: '8px', background: '#f5f5f5', borderRadius: '6px' }}>
-            <strong style={{ fontSize: '12px' }}>{node.char}</strong>
-            <p style={{ margin: 0 }}>{node.text}</p>
+          <div key={i} className="card p-2">
+            <div className="fw-bold small text-muted">{node.char}</div>
+            <div>{node.text}</div>
           </div>
         ))}
       </div>
-
+      {/* Scelte o fine */}
       {currentNode.choices.length > 0 ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div className="d-flex flex-column gap-2">
           {currentNode.choices.map((choice, i) => (
             <button
               key={i}
+              className="btn btn-outline-primary btn-sm text-start"
               onClick={() => handleChoice(choice.targetId)}
               disabled={!choice.targetId}
             >
@@ -47,9 +65,11 @@ function Preview({ nodes }) {
           ))}
         </div>
       ) : (
-        <div>
-          <p style={{ color: '#999', fontSize: '13px' }}>Fine del dialogo</p>
-          <button onClick={handleRestart}>Ricomincia</button>
+        <div className="text-center">
+          <p className="text-muted small">Fine del dialogo</p>
+          <button className="btn btn-outline-secondary btn-sm" onClick={handleRestart}>
+            Ricomincia
+          </button>
         </div>
       )}
     </div>

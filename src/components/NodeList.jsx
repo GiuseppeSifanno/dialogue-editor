@@ -1,93 +1,46 @@
-import { end, start } from "@popperjs/core";
-import NodeConnector from "./NodeConnector";
-
 function NodeList({ nodes, selectedId, onSelect, onAdd, onDelete }) {
-	return (
-		<div className="d-flex flex-column">
-			<div className="d-flex justify-content-end align-items-center mb-3">
-				<button
-					type="button"
-					className="btn btn-primary"
-					data-bs-toggle="button"
-					aria-pressed="false"
-					onClick={onAdd}
-				>
-					aggiungi
-				</button>
-			</div>
+  return (
+    <div className="bg-body-tertiary rounded p-3">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Nodi</h5>
+        <button className="btn btn-primary btn-sm" onClick={onAdd}>
+          + Aggiungi
+        </button>
+      </div>
 
-			<div className="gap-3 d-flex justify-align-content-between flex-md-wrap">
-				{nodes.map((node) => (
-					<div
-						key={node.id}
-						className="d-flex p-2 rounded card h-auto"
-						style={{
-							cursor: "pointer",
-							border: "1px solid #ccc",
-							borderRadius: "6px",
-							justifyContent: "space-between",
-							background: node.id === selectedId ? "#EEEDFE" : "white",
-							width: "350px",
-							minWidth: "250px",
-						}}
-					>
-						<div className="justify-content-end position-relative">
-							<button
-								type="button"
-								className="btn btn-danger position-absolute end-0"
-								aria-pressed="false"
-								data-bs-toggle="button"
-								cursor="pointer"
-								value="delete"
-								onClick={() => onDelete(node.id)}
-								style={{
-									padding: "3px 10px 3px 10px",
-								}}
-							>
-								✕
-							</button>
-						</div>
-
-						<div
-							onClick={() => onSelect(node.id)}
-							style={{
-								flex: 1,
-								padding: "8px",
-								border: "none",
-								background: "transparent",
-							}}
-						>
-							<h3 className="pt-4 text-start">{node.char}</h3>
-							<h2 style={{ margin: 0, fontSize: "20px", color: "#666" }}>
-								{node.text.length > 30
-									? node.text.slice(0, 30) + "…"
-									: node.text}
-							</h2>
-							<div className="container-fluid ms-3">
-								<ul className="list-group">
-									{node.choices.length > 0 &&
-										node.choices.map((c, i) => (
-											<li
-												key={i}
-												className="list-gruop-item border border-2 rounded-end-2 border-black mt-3 p-1"
-												style={{
-													margin: 0,
-													fontSize: "12px",
-													color: "#2e2e2e",
-													textAlign: start,
-												}}
-											>
-												{c.text}
-											</li>
-										))}
-								</ul>
-							</div>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
+      <div className="d-flex flex-column gap-2">
+        {nodes.map(node => (
+          <div
+            key={node.id}
+            className={`card p-2 ${node.id === selectedId ? 'border-primary' : ''}`}
+            style={{ cursor: 'pointer', background: node.id === selectedId ? '#EEEDFE' : 'white' }}
+          >
+            <div className="d-flex justify-content-between align-items-start">
+              <div className="flex-grow-1" onClick={() => onSelect(node.id)}>
+                <div className="fw-bold">{node.char}</div>
+                <div className="text-muted small">
+                  {node.text.length > 40 ? node.text.slice(0, 40) + "…" : node.text}
+                </div>
+                {node.choices.length > 0 && (
+                  <div className="d-flex flex-wrap gap-1 mt-1">
+                    {node.choices.map((c, i) => (
+                      <span key={i} className="badge bg-secondary">{c.text}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                className="btn btn-outline-danger btn-sm ms-2"
+                onClick={() => onDelete(node.id)}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
-export default NodeList;
+export default NodeList
