@@ -1,6 +1,6 @@
 function NodeList({
-  dialoghi, personaggi, selectedId,
-  onSelectDialogo, onAddDialogo, onDeleteDialogo,
+  meta, dialoghi, personaggi, selectedId,
+  onSelectDialogo, onAddDialogo, onDeleteDialogo, onChangeDialogoIniziale,
   onAddPersonaggio, onUpdatePersonaggio, onDeletePersonaggio, 
   openConfirm
 }) {
@@ -12,11 +12,43 @@ function NodeList({
   return (
     <div className="bg-body-tertiary rounded p-3 d-flex flex-column gap-3">
 
+      {/* Personaggi */}
+      <div>
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <h6 className="mb-0 fw-bold">Personaggi</h6>
+          <button className="btn btn-secondary btn-sm" onClick={onAddPersonaggio}>
+            + Aggiungi
+          </button>
+        </div>
+
+        <div className="d-flex flex-column gap-2">
+          {personaggi.map(p => (
+            <div key={p.id} className="d-flex gap-2 align-items-center">
+              <span className="badge bg-secondary">{p.id}</span>
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                value={p.nome}
+                onChange={(e) => onUpdatePersonaggio({ ...p, nome: e.target.value })}
+              />
+              <button
+                className="btn btn-outline-danger btn-sm"
+                onClick={() => 
+                  openConfirm( () => onDeletePersonaggio(p.id), "Vuoi eliminare questo personaggio?")
+                }
+              >✕</button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <hr className="my-1" />
+
       {/* Dialoghi */}
       <div>
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h6 className="mb-0 fw-bold">Dialoghi</h6>
-          <button className="btn btn-primary btn-sm" onClick={onAddDialogo} disabled={!personaggi.length > 0}>
+          <button className="btn btn-primary btn-sm" onClick={onAddDialogo} disabled={personaggi.length === 0}>
             + Aggiungi
           </button>
         </div>
@@ -49,45 +81,25 @@ function NodeList({
                     </div>
                   )}
                 </div>
-                <button
-                  className="btn btn-outline-danger btn-sm ms-2"
-                  onClick={() =>
-                    openConfirm( () => onDeleteDialogo(dialogo.id), "Vuoi eliminare questo dialogo?")
-                  }
-                >✕</button>
+                <div className="btn-group w-auto h-auto">
+                  <button className="border-0 bg-transparent btn btn-sm" value={dialogo.id} 
+                    onClick={ () => onChangeDialogoIniziale(dialogo.id)}>
+                    {dialogo.id === meta.dialogoIniziale ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#FFFF55"><path d="m209-93 103-333L38-641h334l108-332 108 332h334L648-426 752-93 481-299 209-93Z"/></svg>
+                    ):
+                      <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="m384-334 96-74 96 74-36-122 90-64H518l-38-124-38 124H330l90 64-36 122ZM199-69l106-346L22-617h347l111-364 111 364h347L655-415 762-69 481-283 199-69Zm281-420Z"/></svg>
+                    }
+                  </button>
+                    
+                  <button
+                    className="btn btn-outline-danger btn-sm rounded"
+                    onClick={() =>
+                      openConfirm( () => onDeleteDialogo(dialogo.id), "Vuoi eliminare questo dialogo?")
+                    }
+                  >✕</button>
+                </div>
+
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <hr className="my-1" />
-
-      {/* Personaggi */}
-      <div>
-        <div className="d-flex justify-content-between align-items-center mb-2">
-          <h6 className="mb-0 fw-bold">Personaggi</h6>
-          <button className="btn btn-secondary btn-sm" onClick={onAddPersonaggio}>
-            + Aggiungi
-          </button>
-        </div>
-
-        <div className="d-flex flex-column gap-2">
-          {personaggi.map(p => (
-            <div key={p.id} className="d-flex gap-2 align-items-center">
-              <span className="badge bg-secondary">{p.id}</span>
-              <input
-                type="text"
-                className="form-control form-control-sm"
-                value={p.nome}
-                onChange={(e) => onUpdatePersonaggio({ ...p, nome: e.target.value })}
-              />
-              <button
-                className="btn btn-outline-danger btn-sm"
-                onClick={() => 
-                  openConfirm( () => onDeletePersonaggio(p.id), "Vuoi eliminare questo personaggio?")
-                }
-              >✕</button>
             </div>
           ))}
         </div>

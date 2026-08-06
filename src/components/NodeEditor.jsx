@@ -152,7 +152,6 @@ function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate, openConfirm }) {
                 type="text"
                 className="form-control form-control-sm"
                 placeholder="Testo scelta"
-                value={scelta.testo}
                 onChange={(e) => handleEditSceltaTesto(index, e.target.value)}
               />
               <select

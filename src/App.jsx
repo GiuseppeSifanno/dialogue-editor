@@ -52,7 +52,7 @@ function App() {
     const newId = `d${nextDialogoNum}`
     const newDialogo = {
       id: newId,
-      battute: [{ personaggioId: personaggi[0]?.id || "", testo: "" }],
+      battute: [{ personaggioId: "?", testo: "" }],
       scelte: [],
       nextId: ""
     }
@@ -65,6 +65,11 @@ function App() {
     const remaining = dialoghi.filter(d => d.id !== id)
     setDialoghi(remaining)
     setSelectedId(remaining[0]?.id || null)
+  }
+
+  //TODO da rivedere 
+  function handleSetDialogoIniziale(id){
+    setMeta({...meta, dialogoIniziale: id})
   }
 
   function handleAddPersonaggio() {
@@ -179,12 +184,14 @@ function App() {
 
         <div className="d-flex flex-column gap-3" style={{ minWidth: '320px'}}>
           <NodeList
+            meta={meta}
             dialoghi={dialoghi}
             personaggi={personaggi}
             selectedId={selectedId}
             onSelectDialogo={setSelectedId}
             onAddDialogo={handleAddDialogo}
             onDeleteDialogo={handleDeleteDialogo}
+            onChangeDialogoIniziale={handleSetDialogoIniziale}
             onAddPersonaggio={handleAddPersonaggio}
             onUpdatePersonaggio={handleUpdatePersonaggio}
             onDeletePersonaggio={handleDeletePersonaggio}
