@@ -2,6 +2,7 @@ import { useState } from "react"
 import NodeList   from "./components/NodeList"
 import NodeEditor from "./components/NodeEditor"
 import Preview    from "./components/Preview"
+import ConfirmModal from "./components/modal/ConfirmModal"
 
 const savedData = localStorage.getItem("dialogueData")
 const initialData = savedData ? JSON.parse(savedData) : {
@@ -28,7 +29,20 @@ function App() {
   const [nextDialogoNum, setNextDialogoNum] = useState(initialData.dialoghi.length + 1)
   const [nextPersonaggioNum, setNextPersonaggioNum] = useState(initialData.personaggi.length + 1)
 
+  const [showDeleteModal, setShowDeleteModal]   = useState(false)
+  const [deleteAction, setDeleteAction]         = useState(null)
+  const [deleteMessage, setDeleteMessage]       = useState('')
+
   const selectedDialogo = dialoghi.find(d => d.id === selectedId)
+
+  // ── Modal ────────────────────────────────────────
+  function openDeleteModal(action, message) {
+    console.log("Apertura model");
+    
+    setDeleteAction(() => action)
+    setDeleteMessage(message)
+    setShowDeleteModal(true)
+  }
 
   function handleUpdateDialogo(updated) {
     setDialoghi(prev => prev.map(d => d.id === updated.id ? updated : d))
@@ -168,12 +182,13 @@ function App() {
             dialoghi={dialoghi}
             personaggi={personaggi}
             selectedId={selectedId}
-            onSelect={setSelectedId}
-            onAdd={handleAddDialogo}
-            onDelete={handleDeleteDialogo}
+            onSelectDialogo={setSelectedId}
+            onAddDialogo={handleAddDialogo}
+            onDeleteDialogo={handleDeleteDialogo}
             onAddPersonaggio={handleAddPersonaggio}
             onUpdatePersonaggio={handleUpdatePersonaggio}
             onDeletePersonaggio={handleDeletePersonaggio}
+            openConfirm={openDeleteModal}
           />
           <NodeEditor
             key={selectedId}
@@ -181,6 +196,7 @@ function App() {
             dialoghi={dialoghi}
             personaggi={personaggi}
             onUpdate={handleUpdateDialogo}
+            openConfirm={openDeleteModal}
           />
         </div>
 
@@ -191,28 +207,20 @@ function App() {
             dialogoIniziale={meta.dialogoIniziale}
           />
         </div>
+        
+        <ConfirmModal
+          show={showDeleteModal}
+          title="Conferma eliminazione"
+          message={deleteMessage}
+          confirmText="Elimina"
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            deleteAction?.()
+            setShowDeleteModal(false)
+          }}
+        />
 
       </div>
-
-      {/* Modal Static */}
-      <div className="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div className="modal-body">
-              ...
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-primary">Understood</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
   )
 }

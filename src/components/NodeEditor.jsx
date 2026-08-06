@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react'
+import Dialogo from '../models/Dialogo';
+import Battuta from '../models/Battuta';
+import Scelta from '../models/Scelta';
 
-function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate }) {
-  const [local, setLocal] = useState(dialogo)
+function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate, openConfirm }) {
+  const [local, setLocal] = useState(
+    dialogo ? new Dialogo(dialogo): null
+  );
 
   useEffect(() => {
-    setLocal(dialogo)
-  }, [dialogo])
+    setLocal(
+      dialogo ? new Dialogo(dialogo): null
+    );
+  }, [dialogo]);
 
   if (!local) return (
     <div className="bg-body-tertiary rounded p-3 text-muted">
-      Seleziona un dialogo per modificarlo
+      Seleziona o crea un dialogo per modificarlo
     </div>
-  )
+  );
 
   function update(updated) {
     setLocal(updated)
@@ -21,10 +28,13 @@ function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate }) {
   // ── Battute ──────────────────────────────────────
 
   function handleAddBattuta() {
-    update({
+    update(new Dialogo({
       ...local,
-      battute: [...local.battute, { personaggioId: personaggi[0]?.id || '', testo: '' }]
-    })
+      battute: [
+        ...local.battute, 
+        new Battuta(personaggi[0]?.id || '','')
+      ]
+    }));
   }
 
   function handleEditBattutaPersonaggio(index, personaggioId) {
@@ -51,8 +61,11 @@ function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate }) {
     const newId = `s${local.scelte.length + 1}`
     update({
       ...local,
-      scelte: [...local.scelte, { id: newId, testo: 'Nuova scelta', next: '' }]
-    })
+      scelte: [
+        ...local.scelte,
+        new Scelta(newId)
+      ]
+    });
   }
 
   function handleEditSceltaTesto(index, testo) {
@@ -113,7 +126,9 @@ function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate }) {
                 {/* Elimina */}
                 <button
                   className="btn btn-outline-danger btn-sm"
-                  onClick={() => handleDeleteBattuta(index)}
+                  onClick={() => 
+                    openConfirm( () => handleDeleteBattuta(index), "Vuoi eleminare questa battuta?")
+                  }
                 >✕</button>
 
               </div>
@@ -157,7 +172,9 @@ function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate }) {
               </select>
               <button
                 className="btn btn-outline-danger btn-sm"
-                onClick={() => handleDeleteScelta(index)}
+                onClick={() => 
+                  openConfirm( () => handleDeleteScelta(index), "Vuoi eliminare questa Scelta?")
+                }
               >✕</button>
             </div>
           ))}

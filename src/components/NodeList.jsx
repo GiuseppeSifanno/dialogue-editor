@@ -1,7 +1,8 @@
 function NodeList({
   dialoghi, personaggi, selectedId,
-  onSelect, onAdd, onDelete,
-  onAddPersonaggio, onUpdatePersonaggio, onDeletePersonaggio
+  onSelectDialogo, onAddDialogo, onDeleteDialogo,
+  onAddPersonaggio, onUpdatePersonaggio, onDeletePersonaggio, 
+  openConfirm
 }) {
 
   function getNome(personaggioId) {
@@ -15,7 +16,7 @@ function NodeList({
       <div>
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h6 className="mb-0 fw-bold">Dialoghi</h6>
-          <button className="btn btn-primary btn-sm" onClick={onAdd}>
+          <button className="btn btn-primary btn-sm" onClick={onAddDialogo} disabled={!personaggi.length > 0}>
             + Aggiungi
           </button>
         </div>
@@ -28,7 +29,7 @@ function NodeList({
               style={{ background: dialogo.id === selectedId ? '#EEEDFE' : 'white', cursor: 'pointer' }}
             >
               <div className="d-flex justify-content-between align-items-start">
-                <div className="flex-grow-1" onClick={() => onSelect(dialogo.id)}>
+                <div className="flex-grow-1" onClick={() => onSelectDialogo(dialogo.id)}>
                   <div className="text-muted small mb-1">{dialogo.id}</div>
                   {dialogo.battute.slice(0, 2).map((b, i) => (
                     <div key={i} className="small">
@@ -50,7 +51,9 @@ function NodeList({
                 </div>
                 <button
                   className="btn btn-outline-danger btn-sm ms-2"
-                  onClick={() => onDelete(dialogo.id)}
+                  onClick={() =>
+                    openConfirm( () => onDeleteDialogo(dialogo.id), "Vuoi eliminare questo dialogo?")
+                  }
                 >✕</button>
               </div>
             </div>
@@ -81,7 +84,9 @@ function NodeList({
               />
               <button
                 className="btn btn-outline-danger btn-sm"
-                onClick={() => onDeletePersonaggio(p.id)}
+                onClick={() => 
+                  openConfirm( () => onDeletePersonaggio(p.id), "Vuoi eliminare questo personaggio?")
+                }
               >✕</button>
             </div>
           ))}
