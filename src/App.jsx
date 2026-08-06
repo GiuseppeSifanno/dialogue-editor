@@ -2,31 +2,38 @@ import { useState } from "react"
 import NodeList   from "./components/NodeList"
 import NodeEditor from "./components/NodeEditor"
 import Preview    from "./components/Preview"
-import Nodes from "./model/nodes"
 
 const savedNodes = localStorage.getItem("dialogueNodes")
 const initialNodes = savedNodes ? JSON.parse(savedNodes) : [
   { id: 1, char: "Eroe", text: "Ciao, ho bisogno di aiuto.", choices: [
-    { text: "Compro qualcosa", targetId: 2 },
-    { text: "Niente grazie",   targetId: 3 },
-  ]},
-  { id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [] },
-  { id: 3, char: "Guardia",  text: "Alt! Documenti.",         choices: [] },
+    { text: "Compro qualcosa", next: 2 },
+    { text: "Niente grazie",   next: 3 },
+  ], 
+  nextId: null},
+  { id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [], nextId: 3 },
+  { id: 3, char: "Guardia",  text: "Alt! Documenti.",         choices: [], nextId: null },
 ]
 
 function App() {
   const [nodes, setNodes]           = useState(initialNodes)
   const [selectedId, setSelectedId] = useState(initialNodes[0]?.id || null)
   const [nextId, setNextId]         = useState(4)
+  const [characters, setCharacters] = useState(
+    () => [...new Set(initialNodes.map(n => n.char))]
+  )
 
   const selectedNode = nodes.find(n => n.id === selectedId)
 
   function handleUpdate(updatedNode) {
     setNodes(prev => prev.map(n => n.id === updatedNode.id ? updatedNode : n))
+    // aggiunge il personaggio alla lista se è nuovo
+    setCharacters(prev =>
+      prev.includes(updatedNode.char) ? prev : [...prev, updatedNode.char]
+    )
   }
 
   function handleAdd() {
-    const newNode = { id: nextId, char: "Personaggio", text: "Nuovo dialogo", choices: [] }
+    const newNode = { id: nextId, char: "Personaggio", text: "Nuovo dialogo", choices: [], nextId: null }
     setNodes(prev => [...prev, newNode])
     setSelectedId(nextId)
     setNextId(nextId + 1)
@@ -67,7 +74,7 @@ function App() {
   }
 
   return (
-    <div className="bg-dark min-vh-100 d-flex flex-column p-3 gap-3">
+    <div className="bg-dark min-vh-100 d-flex flex-column p-2 gap-3">
 
       {/* Navbar */}
       <nav className="navbar navbar-expand-sm bg-body-tertiary rounded px-3">
@@ -113,6 +120,7 @@ function App() {
             key={selectedId}
             node={selectedNode}
             nodes={nodes}
+            characters={characters}
             onUpdate={handleUpdate}
           />
         </div>

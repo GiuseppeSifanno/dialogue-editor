@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function NodeEditor({ node, nodes, onUpdate }) {
+function NodeEditor({ node, nodes, characters, onUpdate }) {
   const [localNode, setLocalNode] = useState(node)
 
   useEffect(() => {
@@ -49,6 +49,7 @@ function NodeEditor({ node, nodes, onUpdate }) {
         <input
           type="text"
           className="form-control"
+          list="characters-list"
           value={localNode.char}
           onChange={(e) => {
             const updated = { ...localNode, char: e.target.value }
@@ -56,6 +57,11 @@ function NodeEditor({ node, nodes, onUpdate }) {
             onUpdate(updated)
           }}
         />
+        <datalist id="characters-list">
+          {characters.map((char, i) => (
+            <option key={i} value={char} />
+          ))}
+        </datalist>
       </div>
 
       <div>
@@ -103,9 +109,34 @@ function NodeEditor({ node, nodes, onUpdate }) {
             </div>
           ))}
         </div>
-        <button className="btn btn-outline-secondary btn-sm mt-2" onClick={handleAddChoice}>
+        <button className="btn btn-outline-secondary btn-sm" onClick={handleAddChoice}>
           + Aggiungi scelta
         </button>
+
+        {localNode.choices.length === 0 && (
+          <div className='mt-2'>
+            <label className="form-label">Continua verso</label>
+            <select
+              className="form-select"
+              value={localNode.skipTo || ''}
+              onChange={(e) => {
+                const updated = { ...localNode, skipTo: e.target.value ? Number(e.target.value) : null }
+                setLocalNode(updated)
+                onUpdate(updated)
+              }}
+            >
+            <option value="">Nessuno — fine dialogo</option>
+            {nodes
+              .filter(n => n.id !== localNode.id)
+              .map(n => (
+                <option key={n.id} value={n.id}>
+                  {n.char}: {n.text.slice(0, 20)}…
+                </option>
+              ))
+            }
+            </select>
+          </div>
+        )}
       </div>
     </div>
   )

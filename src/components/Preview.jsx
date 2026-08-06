@@ -64,6 +64,13 @@ function Preview({ nodes }) {
             </button>
           ))}
         </div>
+      ) : currentNode.skitTo ? (
+        <button
+          className="btn btn-outline-secondary btn-sm"
+          onClick={() => handleChoice(currentNode.skipTo)}
+        >
+          Continua →
+        </button>
       ) : (
         <div className="text-center">
           <p className="text-muted small">Fine del dialogo</p>
