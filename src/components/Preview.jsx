@@ -60,7 +60,14 @@ function Preview({
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="mb-0">Anteprima</h5>
-        <button className="btn btn-outline-secondary btn-sm" onClick={handleRestart}>
+        <button 
+          id='tooltip-preview'
+          className="btn btn-outline-secondary btn-sm" 
+          data-bs-toggle="tooltip" 
+          data-bs-placement="left" 
+          data-bs-title="Clicca per aggiornare la preview" 
+          onClick={handleRestart}
+        >
           Ricomincia
         </button>
       </div>

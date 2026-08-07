@@ -47,7 +47,13 @@ function NodeList({
       {/* Dialoghi */}
       <div>
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <h6 className="mb-0 fw-bold">Dialoghi</h6>
+          <div>
+            <h6 className="mb-0 fw-bold">Dialoghi</h6>
+            { dialoghi && (
+              <h6 className="small ps-1 fst-italic">Dialogo iniziale: {meta.dialogoIniziale}</h6>
+            )}
+            </div>
+          
           <button className="btn btn-primary btn-sm" onClick={onAddDialogo} disabled={personaggi.length === 0}>
             + Aggiungi
           </button>

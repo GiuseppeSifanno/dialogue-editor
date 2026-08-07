@@ -1,8 +1,9 @@
-import { useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import NodeList   from "./components/NodeList"
 import NodeEditor from "./components/NodeEditor"
 import Preview    from "./components/Preview"
 import ConfirmModal from "./components/modal/ConfirmModal"
+import * as bootstrap from 'bootstrap'
 
 const savedData = localStorage.getItem("dialogueData")
 const initialData = savedData ? JSON.parse(savedData) : {
@@ -35,6 +36,33 @@ function App() {
 
   const selectedDialogo = dialoghi.find(d => d.id === selectedId)
 
+  // Tooltip
+  const tooltipRef = useRef(null)
+
+  useEffect(() => {
+    const element = document.getElementById("tooltip-preview")
+
+    if (element) {
+      tooltipRef.current = new bootstrap.Tooltip(element, {
+        trigger: "manual",
+        placement: "top",
+        animation: true
+      })
+    }
+
+    return () => {
+      tooltipRef.current?.dispose()
+    }
+  }, [])
+
+  function showToolTip(){
+    tooltipRef.current?.show()
+
+    setTimeout(() => {
+      tooltipRef.current?.hide()
+    }, 1300)
+  }
+
   // ── Modal ────────────────────────────────────────
   function openDeleteModal(action, message) {
     console.log("Apertura model");
@@ -59,17 +87,23 @@ function App() {
     setDialoghi(prev => [...prev, newDialogo])
     setSelectedId(newId)
     setNextDialogoNum(nextDialogoNum + 1)
+    
+    showToolTip()
   }
 
   function handleDeleteDialogo(id) {
     const remaining = dialoghi.filter(d => d.id !== id)
     setDialoghi(remaining)
     setSelectedId(remaining[0]?.id || null)
+
+    showToolTip()
   }
 
   //TODO da rivedere 
   function handleSetDialogoIniziale(id){
     setMeta({...meta, dialogoIniziale: id})
+
+    showToolTip()
   }
 
   function handleAddPersonaggio() {
@@ -77,6 +111,8 @@ function App() {
     const newPersonaggio = { id: newId, nome: `Personaggio ${nextPersonaggioNum}` }
     setPersonaggi(prev => [...prev, newPersonaggio])
     setNextPersonaggioNum(nextPersonaggioNum + 1)
+
+    showToolTip()
   }
 
   function handleUpdatePersonaggio(updated) {
@@ -85,6 +121,8 @@ function App() {
 
   function handleDeletePersonaggio(id) {
     setPersonaggi(prev => prev.filter(p => p.id !== id))
+
+    showToolTip()
   }
 
   function handleSave() {
@@ -182,7 +220,7 @@ function App() {
 
       <div className="d-flex flex-column flex-sm-row gap-3 flex-grow-1">
 
-        <div className="d-flex flex-column gap-3" style={{ minWidth: '320px'}}>
+        <div className="d-flex flex-column gap-3" style={{ minWidth: '470px'}}>
           <NodeList
             meta={meta}
             dialoghi={dialoghi}
