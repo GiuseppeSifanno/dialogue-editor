@@ -3,6 +3,7 @@ import NodeList     from "../components/NodeList"
 import NodeEditor   from "../components/NodeEditor"
 import Preview      from "../components/Preview"
 import ConfirmModal from "../components/modal/ConfirmModal"
+import Toast        from "../components/Toast" 
 import * as bootstrap from 'bootstrap'
 
 function EditorScreen({ attoId, onBack, onRename }) {
@@ -37,6 +38,7 @@ function EditorScreen({ attoId, onBack, onRename }) {
   const selectedDialogo = dialoghi.find(d => d.id === selectedId)
   const tooltipRef = useRef(null)
 
+  // useEffect per tooltip
   useEffect(() => {
     const element = document.getElementById("tooltip-preview")
     if (element) {
@@ -48,6 +50,26 @@ function EditorScreen({ attoId, onBack, onRename }) {
     }
     return () => { tooltipRef.current?.dispose() }
   }, [])
+
+  // Toast per l'autosalvataggio
+  const [toastMessage, setToastMessage] = useState("")
+  const [showToast, setShowToast]       = useState(false)
+
+  function showToastMsg(msg) {
+    setToastMessage(msg)
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
+
+  // useEffect per l'autosalvataggio
+  useEffect( () => {
+    const timer = setTimeout( () => {
+      saveData(meta, personaggi, dialoghi)
+      showToastMsg("Salvato!")
+    }, 1000)
+    
+    return () => clearTimeout(timer)
+  }, [meta, personaggi, dialoghi])
 
   function showTooltip() {
     tooltipRef.current?.show()
@@ -108,22 +130,18 @@ function EditorScreen({ attoId, onBack, onRename }) {
   }
 
   function handleSave() {
-    const data = { meta, personaggi, dialoghi }
-    localStorage.setItem(`atto:${meta.idAtto}`, JSON.stringify(data))
+    saveData(meta, personaggi, dialoghi)
+  showToastMsg("Salvato!")
+  }
+
+  function saveData(metaData, personaggiData, dialoghiData) {
+    const data = { meta: metaData, personaggi: personaggiData, dialoghi: dialoghiData }
+    localStorage.setItem(`atto:${metaData.idAtto}`, JSON.stringify(data))
 
     const atti = JSON.parse(localStorage.getItem("atti") || "[]")
-    if (meta.idAtto !== attoId) {
-      localStorage.removeItem(`atto:${attoId}`)
-      const updated = atti.map(id => id === attoId ? meta.idAtto : id)
-      localStorage.setItem("atti", JSON.stringify(updated))
-      onRename(meta.idAtto)
-    } else {
-      if (!atti.includes(attoId)) {
-        localStorage.setItem("atti", JSON.stringify([...atti, attoId]))
-      }
+    if (!atti.includes(metaData.idAtto)) {
+      localStorage.setItem("atti", JSON.stringify([...atti, metaData.idAtto]))
     }
-
-    alert("Salvato!")
   }
 
   function handleExport() {
@@ -281,6 +299,13 @@ function EditorScreen({ attoId, onBack, onRename }) {
           onConfirm={() => { deleteAction?.(); setShowDeleteModal(false) }}
         />
       </div>
+
+      <Toast
+        show={showToast}
+        message={toastMessage}
+        onClose={ () => {setShowToast(false)}}
+      ></Toast>
+
     </div>
   )
 }
