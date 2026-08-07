@@ -230,7 +230,7 @@ function EditorScreen({ attoId, onBack, onRename }) {
               }}
             />
             <img
-              src="/edit-icon.svg" alt="edit" width={20}
+              src={`${import.meta.env.BASE_URL}edit-icon.svg`} alt="edit" width={20}
               className="ms-1 align-middle"
               style={{ opacity: iconHover ? 1 : 0.5, transition: 'opacity 0.15s', cursor: 'pointer' }}
               onMouseEnter={() => setIconHover(true)}
