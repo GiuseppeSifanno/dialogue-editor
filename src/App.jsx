@@ -27,8 +27,12 @@ function App() {
   const [personaggi, setPersonaggi] = useState(initialData.personaggi)
   const [dialoghi, setDialoghi]     = useState(initialData.dialoghi)
   const [selectedId, setSelectedId] = useState(initialData.meta.dialogoIniziale)
-  const [nextDialogoNum, setNextDialogoNum] = useState(initialData.dialoghi.length + 1)
-  const [nextPersonaggioNum, setNextPersonaggioNum] = useState(initialData.personaggi.length + 1)
+  const [nextDialogoNum, setNextDialogoNum] = useState(
+    Math.max(...initialData.dialoghi.map(d => parseInt(d.id.slice(1)))) + 1
+  )
+  const [nextPersonaggioNum, setNextPersonaggioNum] = useState(
+    Math.max(...initialData.personaggi.map(p => parseInt(p.id.slice(1)))) + 1
+  )
 
   const [showDeleteModal, setShowDeleteModal]   = useState(false)
   const [deleteAction, setDeleteAction]         = useState(null)
@@ -99,7 +103,6 @@ function App() {
     showToolTip()
   }
 
-  //TODO da rivedere 
   function handleSetDialogoIniziale(id){
     setMeta({...meta, dialogoIniziale: id})
 
@@ -145,14 +148,33 @@ function App() {
 
   function handleImport(e) {
     const file = e.target.files[0]
-    if (!file) return
+    if (!file) 
+      return
+
     const reader = new FileReader()
     reader.onload = (event) => {
-      const parsed = JSON.parse(event.target.result)
-      setMeta(parsed.meta)
-      setPersonaggi(parsed.personaggi)
-      setDialoghi(parsed.dialoghi)
-      setSelectedId(parsed.meta.dialogoIniziale)
+      try {
+        const parsed = JSON.parse(event.target.result)
+
+        if (!parsed.meta || !parsed.personaggi || !parsed.dialoghi) {
+          throw new Error("Struttura JSON non valida")
+        }
+
+        setMeta(parsed.meta)
+        setPersonaggi(parsed.personaggi)
+        setDialoghi(parsed.dialoghi)
+        setSelectedId(parsed.meta.dialogoIniziale)
+
+        // ← aggiungi qui
+        const maxD = Math.max(...parsed.dialoghi.map(d => parseInt(d.id.slice(1))))
+        setNextDialogoNum(maxD + 1)
+
+        const maxP = Math.max(...parsed.personaggi.map(p => parseInt(p.id.slice(1))))
+        setNextPersonaggioNum(maxP + 1)
+
+      } catch (error) {
+        alert("File JSON non valido")
+      }
     }
     reader.readAsText(file)
   }
@@ -220,7 +242,7 @@ function App() {
 
       <div className="d-flex flex-column flex-sm-row gap-3 flex-grow-1">
 
-        <div className="d-flex flex-column gap-3" style={{ minWidth: '470px'}}>
+        <div className="d-flex flex-column gap-3">
           <NodeList
             meta={meta}
             dialoghi={dialoghi}

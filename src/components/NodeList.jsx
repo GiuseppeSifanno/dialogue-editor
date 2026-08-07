@@ -79,13 +79,20 @@ function NodeList({
                   {dialogo.battute.length > 2 && (
                     <div className="text-muted small">+{dialogo.battute.length - 2} battute</div>
                   )}
-                  {dialogo.scelte.length > 0 && (
-                    <div className="d-flex flex-wrap gap-1 mt-1">
-                      {dialogo.scelte.map((s, i) => (
-                        <span key={i} className="badge bg-secondary">{s.testo.slice(0, 20)}</span>
-                      ))}
+                  <div className="d-flex">
+                    <div>
+                      <span className="fw-bold fst-italic">Scelte: </span>
                     </div>
-                  )}
+                    <div className="ms-2">
+                      {dialogo.scelte.length > 0 && (
+                        <div className="d-flex flex-wrap gap-1 mt-1">
+                          {dialogo.scelte.map((s, i) => (
+                            <span key={i} className="badge bg-secondary">{s.testo.slice(0, 20)}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="btn-group w-auto h-auto">
                   <button className="border-0 bg-transparent btn btn-sm" value={dialogo.id} 
