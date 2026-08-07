@@ -1,84 +1,220 @@
-import { useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import NodeList   from "./components/NodeList"
 import NodeEditor from "./components/NodeEditor"
 import Preview    from "./components/Preview"
+import ConfirmModal from "./components/modal/ConfirmModal"
+import * as bootstrap from 'bootstrap'
 
-const savedNodes = localStorage.getItem("dialogueNodes")
-const initialNodes = savedNodes ? JSON.parse(savedNodes) : [
-  { id: 1, char: "Eroe", text: "Ciao, ho bisogno di aiuto.", choices: [
-    { text: "Compro qualcosa", next: 2 },
-    { text: "Niente grazie",   next: 3 },
-  ], 
-  nextId: null},
-  { id: 2, char: "Mercante", text: "Cosa posso fare per te?", choices: [], nextId: 3 },
-  { id: 3, char: "Guardia",  text: "Alt! Documenti.",         choices: [], nextId: null },
-]
+const savedData = localStorage.getItem("dialogueData")
+const initialData = savedData ? JSON.parse(savedData) : {
+  meta: { idAtto: "a1", dialogoIniziale: "d1" },
+  personaggi: [
+    { id: "p1", nome: "Personaggio 1" },
+  ],
+  dialoghi: [
+    {
+      id: "d1",
+      battute: [{ personaggioId: "p1", testo: "Ciao, come posso aiutarti?" }],
+      scelte: [],
+      nextId: ""
+    }
+  ]
+}
 
 function App() {
-  const [nodes, setNodes]           = useState(initialNodes)
-  const [selectedId, setSelectedId] = useState(initialNodes[0]?.id || null)
-  const [nextId, setNextId]         = useState(4)
-  const [characters, setCharacters] = useState(
-    () => [...new Set(initialNodes.map(n => n.char))]
+  const [iconHover, setIconHover]   = useState(false)
+  const [meta, setMeta]             = useState(initialData.meta)
+  const [personaggi, setPersonaggi] = useState(initialData.personaggi)
+  const [dialoghi, setDialoghi]     = useState(initialData.dialoghi)
+  const [selectedId, setSelectedId] = useState(initialData.meta.dialogoIniziale)
+  const [nextDialogoNum, setNextDialogoNum] = useState(
+    Math.max(...initialData.dialoghi.map(d => parseInt(d.id.slice(1)))) + 1
+  )
+  const [nextPersonaggioNum, setNextPersonaggioNum] = useState(
+    Math.max(...initialData.personaggi.map(p => parseInt(p.id.slice(1)))) + 1
   )
 
-  const selectedNode = nodes.find(n => n.id === selectedId)
+  const [showDeleteModal, setShowDeleteModal]   = useState(false)
+  const [deleteAction, setDeleteAction]         = useState(null)
+  const [deleteMessage, setDeleteMessage]       = useState('')
 
-  function handleUpdate(updatedNode) {
-    setNodes(prev => prev.map(n => n.id === updatedNode.id ? updatedNode : n))
-    // aggiunge il personaggio alla lista se è nuovo
-    setCharacters(prev =>
-      prev.includes(updatedNode.char) ? prev : [...prev, updatedNode.char]
-    )
+  const selectedDialogo = dialoghi.find(d => d.id === selectedId)
+
+  // Tooltip
+  const tooltipRef = useRef(null)
+
+  useEffect(() => {
+    const element = document.getElementById("tooltip-preview")
+
+    if (element) {
+      tooltipRef.current = new bootstrap.Tooltip(element, {
+        trigger: "manual",
+        placement: "top",
+        animation: true
+      })
+    }
+
+    return () => {
+      tooltipRef.current?.dispose()
+    }
+  }, [])
+
+  function showToolTip(){
+    tooltipRef.current?.show()
+
+    setTimeout(() => {
+      tooltipRef.current?.hide()
+    }, 1300)
   }
 
-  function handleAdd() {
-    const newNode = { id: nextId, char: "Personaggio", text: "Nuovo dialogo", choices: [], nextId: null }
-    setNodes(prev => [...prev, newNode])
-    setSelectedId(nextId)
-    setNextId(nextId + 1)
+  // ── Modal ────────────────────────────────────────
+  function openDeleteModal(action, message) {
+    console.log("Apertura model");
+    
+    setDeleteAction(() => action)
+    setDeleteMessage(message)
+    setShowDeleteModal(true)
   }
 
-  function handleDelete() {
-    const remaining = nodes.filter(n => n.id !== selectedId)
-    setNodes(remaining)
+  function handleUpdateDialogo(updated) {
+    setDialoghi(prev => prev.map(d => d.id === updated.id ? updated : d))
+  }
+
+  function handleAddDialogo() {
+    const newId = `d${nextDialogoNum}`
+    const newDialogo = {
+      id: newId,
+      battute: [{ personaggioId: "?", testo: "" }],
+      scelte: [],
+      nextId: ""
+    }
+    setDialoghi(prev => [...prev, newDialogo])
+    setSelectedId(newId)
+    setNextDialogoNum(nextDialogoNum + 1)
+    
+    showToolTip()
+  }
+
+  function handleDeleteDialogo(id) {
+    const remaining = dialoghi.filter(d => d.id !== id)
+    setDialoghi(remaining)
     setSelectedId(remaining[0]?.id || null)
+
+    showToolTip()
+  }
+
+  function handleSetDialogoIniziale(id){
+    setMeta({...meta, dialogoIniziale: id})
+
+    showToolTip()
+  }
+
+  function handleAddPersonaggio() {
+    const newId = `p${nextPersonaggioNum}`
+    const newPersonaggio = { id: newId, nome: `Personaggio ${nextPersonaggioNum}` }
+    setPersonaggi(prev => [...prev, newPersonaggio])
+    setNextPersonaggioNum(nextPersonaggioNum + 1)
+
+    showToolTip()
+  }
+
+  function handleUpdatePersonaggio(updated) {
+    setPersonaggi(prev => prev.map(p => p.id === updated.id ? updated : p))
+  }
+
+  function handleDeletePersonaggio(id) {
+    setPersonaggi(prev => prev.filter(p => p.id !== id))
+
+    showToolTip()
   }
 
   function handleSave() {
-    localStorage.setItem("dialogueNodes", JSON.stringify(nodes))
+    const data = { meta, personaggi, dialoghi }
+    localStorage.setItem("dialogueData", JSON.stringify(data))
     alert("Salvato!")
   }
 
   function handleExport() {
-    const json = JSON.stringify(nodes, null, 2)
+    const data = { meta, personaggi, dialoghi }
+    const json = JSON.stringify(data, null, 2)
     const blob = new Blob([json], { type: "application/json" })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement("a")
     a.href     = url
-    a.download = "dialogo.json"
+    a.download = `${meta.idAtto}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
 
   function handleImport(e) {
     const file = e.target.files[0]
-    if (!file) return
+    if (!file) 
+      return
+
     const reader = new FileReader()
     reader.onload = (event) => {
-      const parsed = JSON.parse(event.target.result)
-      setNodes(parsed)
-      setSelectedId(parsed[0]?.id || null)
+      try {
+        const parsed = JSON.parse(event.target.result)
+
+        if (!parsed.meta || !parsed.personaggi || !parsed.dialoghi) {
+          throw new Error("Struttura JSON non valida")
+        }
+
+        setMeta(parsed.meta)
+        setPersonaggi(parsed.personaggi)
+        setDialoghi(parsed.dialoghi)
+        setSelectedId(parsed.meta.dialogoIniziale)
+
+        // ← aggiungi qui
+        const maxD = Math.max(...parsed.dialoghi.map(d => parseInt(d.id.slice(1))))
+        setNextDialogoNum(maxD + 1)
+
+        const maxP = Math.max(...parsed.personaggi.map(p => parseInt(p.id.slice(1))))
+        setNextPersonaggioNum(maxP + 1)
+
+      } catch (error) {
+        alert("File JSON non valido")
+      }
     }
     reader.readAsText(file)
   }
 
-  return (
-    <div className="bg-dark min-vh-100 d-flex flex-column p-2 gap-3">
+  function setInputActive(e) {
+    const input = document.getElementById('idAtto')
+    input.removeAttribute('readOnly')
+    input.focus()
+    input.setSelectionRange(1,3)
 
+  }
+
+  return (
+    <div className="bg-dark min-vh-100 d-flex flex-column p-3 gap-3">
       {/* Navbar */}
       <nav className="navbar navbar-expand-sm bg-body-tertiary rounded px-3">
-        <span className="navbar-brand fw-bold p-0" style={{fontSize: "25px"}}>Dialog Editor</span>
+        <span className="navbar-brand fw-bold">
+          Dialog Editor — Id Atto: 
+          <input 
+            type="text" name="meta" id="idAtto" style={{color:"red", width:"10%", backgroundColor:"lightgray", textAlign:"center"}} value={meta.idAtto}
+            className="border-1 border-bottom-100 ms-2 form-control d-inline p-1" maxLength={3} min={2}
+            onChange={ (e) => {
+              const val = e.target.value
+              if (/^a\d{0,2}$/.test(val)) {
+                setMeta({ ...meta, idAtto: val })
+              }}}
+            readOnly
+          />
+          <img
+            src="/edit-icon.svg"
+            alt="edit"
+            id="idAtto-edit"
+            width={20}
+            className="ms-1 align-middle"
+            style={{ opacity: iconHover ? 1 : 0.5, transition: 'opacity 0.15s', cursor: 'pointer' }}
+            onMouseEnter={() => setIconHover(true)}
+            onMouseLeave={() => setIconHover(false)}
+            onClick={() => setInputActive(true)}
+          />
+        </span>
         <button
           className="navbar-toggler"
           type="button"
@@ -102,33 +238,54 @@ function App() {
           </div>
         </div>
       </nav>
+      {/* Fine navbar */}
 
-      {/* Layout principale */}
-      <div id="layout-principale" className="d-flex justify-content-between flex-column flex-lg-row gap-3 flex-grow-1">
+      <div className="d-flex flex-column flex-sm-row gap-3 flex-grow-1">
 
-        {/* Colonna sinistra: lista + editor */}
-        <div id="layout-list-editor" className="d-flex justify-content-evenly flex-column gap-3" 
-					style={{ minWidth: '320px', maxWidth: '420px'}}>
+        <div className="d-flex flex-column gap-3">
           <NodeList
-            nodes={nodes}
+            meta={meta}
+            dialoghi={dialoghi}
+            personaggi={personaggi}
             selectedId={selectedId}
-            onSelect={setSelectedId}
-            onAdd={handleAdd}
-            onDelete={handleDelete}
+            onSelectDialogo={setSelectedId}
+            onAddDialogo={handleAddDialogo}
+            onDeleteDialogo={handleDeleteDialogo}
+            onChangeDialogoIniziale={handleSetDialogoIniziale}
+            onAddPersonaggio={handleAddPersonaggio}
+            onUpdatePersonaggio={handleUpdatePersonaggio}
+            onDeletePersonaggio={handleDeletePersonaggio}
+            openConfirm={openDeleteModal}
           />
           <NodeEditor
             key={selectedId}
-            node={selectedNode}
-            nodes={nodes}
-            characters={characters}
-            onUpdate={handleUpdate}
+            dialogo={selectedDialogo}
+            dialoghi={dialoghi}
+            personaggi={personaggi}
+            onUpdate={handleUpdateDialogo}
+            openConfirm={openDeleteModal}
           />
         </div>
 
-        {/* Colonna destra: anteprima */}
         <div className="flex-grow-1">
-          <Preview nodes={nodes} />
+          <Preview
+            dialoghi={dialoghi}
+            personaggi={personaggi}
+            dialogoIniziale={meta.dialogoIniziale}
+          />
         </div>
+        
+        <ConfirmModal
+          show={showDeleteModal}
+          title="Conferma eliminazione"
+          message={deleteMessage}
+          confirmText="Elimina"
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            deleteAction?.()
+            setShowDeleteModal(false)
+          }}
+        />
 
       </div>
     </div>

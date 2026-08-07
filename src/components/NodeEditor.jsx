@@ -1,143 +1,213 @@
 import { useState, useEffect } from 'react'
+import Dialogo from '../models/Dialogo';
+import Battuta from '../models/Battuta';
+import Scelta from '../models/Scelta';
 
-function NodeEditor({ node, nodes, characters, onUpdate }) {
-  const [localNode, setLocalNode] = useState(node)
+function NodeEditor({ dialogo, dialoghi, personaggi, onUpdate, openConfirm }) {
+  const [local, setLocal] = useState(
+    dialogo ? new Dialogo(dialogo): null
+  );
 
   useEffect(() => {
-    setLocalNode(node)
-  }, [node])
+    setLocal(
+      dialogo ? new Dialogo(dialogo): null
+    );
+  }, [dialogo]);
 
-  if (!localNode) return (
+  if (!local) return (
     <div className="bg-body-tertiary rounded p-3 text-muted">
-      Seleziona un nodo per modificarlo
+      Seleziona o crea un dialogo per modificarlo
     </div>
-  )
+  );
 
-  function handleAddChoice() {
-    const updated = { ...localNode, choices: [...localNode.choices, { text: 'Nuova scelta', targetId: null }] }
-    setLocalNode(updated)
+  function update(updated) {
+    setLocal(updated)
     onUpdate(updated)
   }
 
-  function handleEditChoiceText(index, value) {
-    const newChoices = localNode.choices.map((c, i) => i === index ? { ...c, text: value } : c)
-    const updated = { ...localNode, choices: newChoices }
-    setLocalNode(updated)
-    onUpdate(updated)
+  // ── Battute ──────────────────────────────────────
+
+  function handleAddBattuta() {
+    update(new Dialogo({
+      ...local,
+      battute: [
+        ...local.battute, 
+        new Battuta(personaggi[0]?.id || '','')
+      ]
+    }));
   }
 
-  function handleEditChoiceTarget(index, targetId) {
-    const newChoices = localNode.choices.map((c, i) => i === index ? { ...c, targetId: Number(targetId) } : c)
-    const updated = { ...localNode, choices: newChoices }
-    setLocalNode(updated)
-    onUpdate(updated)
+  function handleEditBattutaPersonaggio(index, personaggioId) {
+    const newBattute = local.battute.map((b, i) =>
+      i === index ? { ...b, personaggioId } : b
+    )
+    update({ ...local, battute: newBattute })
   }
 
-  function handleDeleteChoice(index) {
-    const newChoices = localNode.choices.filter((_, i) => i !== index)
-    const updated = { ...localNode, choices: newChoices }
-    setLocalNode(updated)
-    onUpdate(updated)
+  function handleEditBattutaTesto(index, testo) {
+    const newBattute = local.battute.map((b, i) =>
+      i === index ? { ...b, testo } : b
+    )
+    update({ ...local, battute: newBattute })
+  }
+
+  function handleDeleteBattuta(index) {
+    update({ ...local, battute: local.battute.filter((_, i) => i !== index) })
+  }
+
+  // ── Scelte ───────────────────────────────────────
+
+  function handleAddScelta() {
+    const newId = `s${local.scelte.length + 1}`
+    update({
+      ...local,
+      scelte: [
+        ...local.scelte,
+        new Scelta(newId)
+      ]
+    });
+  }
+
+  function handleEditSceltaTesto(index, testo) {
+    const newScelte = local.scelte.map((s, i) =>
+      i === index ? { ...s, testo } : s
+    )
+    update({ ...local, scelte: newScelte })
+  }
+
+  function handleEditSceltaNext(index, next) {
+    const newScelte = local.scelte.map((s, i) =>
+      i === index ? { ...s, next } : s
+    )
+    update({ ...local, scelte: newScelte })
+  }
+
+  function handleDeleteScelta(index) {
+    update({ ...local, scelte: local.scelte.filter((_, i) => i !== index) })
   }
 
   return (
     <div className="bg-body-tertiary rounded p-3 d-flex flex-column gap-3">
-      <h5 className="mb-0">Modifica nodo</h5>
-
-      <div>
-        <label className="form-label">Personaggio</label>
-        <input
-          type="text"
-          className="form-control"
-          list="characters-list"
-          value={localNode.char}
-          onChange={(e) => {
-            const updated = { ...localNode, char: e.target.value }
-            setLocalNode(updated)
-            onUpdate(updated)
-          }}
-        />
-        <datalist id="characters-list">
-          {characters.map((char, i) => (
-            <option key={i} value={char} />
-          ))}
-        </datalist>
+      <div className="d-flex justify-content-between align-items-center">
+        <h5 className="mb-0">Modifica dialogo</h5>
+        <span className="badge bg-secondary">{local.id}</span>
       </div>
 
+      {/* Battute */}
       <div>
-        <label className="form-label">Testo</label>
-        <textarea
-          className="form-control"
-          rows={3}
-          value={localNode.text}
-          onChange={(e) => {
-            const updated = { ...localNode, text: e.target.value }
-            setLocalNode(updated)
-            onUpdate(updated)
-          }}
-        />
-      </div>
-
-      <div>
-        <label className="form-label">Scelte</label>
+        <label className="form-label fw-bold">Script</label>
         <div className="d-flex flex-column gap-2">
-          {localNode.choices.map((choice, index) => (
+          {local.battute.map((battuta, index) => (
+            <div key={index} className="card p-2">
+              <div className="d-flex gap-2 align-items-start">
+
+                {/* Personaggio */}
+                <select
+                  className="form-select form-select-sm"
+                  style={{ maxWidth: '140px' }}
+                  value={battuta.personaggioId}
+                  onChange={(e) => handleEditBattutaPersonaggio(index, e.target.value)}
+                >
+                  <option value="">— nessuno —</option>
+                  {personaggi.map(p => (
+                    <option key={p.id} value={p.id}>{p.nome}</option>
+                  ))}
+                </select>
+
+                {/* Testo */}
+                <textarea
+                  className="form-control form-control-sm"
+                  rows={2}
+                  placeholder="Testo battuta..."
+                  value={battuta.testo}
+                  onChange={(e) => handleEditBattutaTesto(index, e.target.value)}
+                />
+
+                {/* Elimina */}
+                <button
+                  className="btn btn-outline-danger btn-sm"
+                  onClick={() => 
+                    openConfirm( () => handleDeleteBattuta(index), "Vuoi eleminare questa battuta?")
+                  }
+                >✕</button>
+
+              </div>
+            </div>
+          ))}
+        </div>
+        <button className="btn btn-outline-secondary btn-sm mt-2" onClick={handleAddBattuta}>
+          + Aggiungi battuta
+        </button>
+      </div>
+
+      <hr className="my-1" />
+
+      {/* Scelte */}
+      <div>
+        <label className="form-label fw-bold">Scelte</label>
+        <div className="d-flex flex-column gap-2">
+          {local.scelte.map((scelta, index) => (
             <div key={index} className="d-flex gap-2 align-items-center">
               <input
                 type="text"
                 className="form-control form-control-sm"
                 placeholder="Testo scelta"
-                value={choice.text}
-                onChange={(e) => handleEditChoiceText(index, e.target.value)}
+                value={scelta.testo}
+                onChange={(e) => handleEditSceltaTesto(index, e.target.value)}
               />
               <select
                 className="form-select form-select-sm"
-                value={choice.targetId || ''}
-                onChange={(e) => handleEditChoiceTarget(index, e.target.value)}
+                value={scelta.next}
+                onChange={(e) => handleEditSceltaNext(index, e.target.value)}
               >
-                <option value="">→ nodo</option>
-                {nodes.filter(n => n.id !== localNode.id).map(n => (
-                  <option key={n.id} value={n.id}>
-                    {n.char}: {n.text.slice(0, 20)}…
-                  </option>
-                ))}
+                <option value="">→ dialogo</option>
+                {dialoghi
+                  .filter(d => d.id !== local.id)
+                  .map(d => (
+                    <option key={d.id} value={d.id}>
+                      {d.id} — {d.battute[0]?.testo.slice(0, 20)}…
+                    </option>
+                  ))
+                }
               </select>
               <button
                 className="btn btn-outline-danger btn-sm"
-                onClick={() => handleDeleteChoice(index)}
+                onClick={() => 
+                  openConfirm( () => handleDeleteScelta(index), "Vuoi eliminare questa Scelta?")
+                }
               >✕</button>
             </div>
           ))}
         </div>
-        <button className="btn btn-outline-secondary btn-sm" onClick={handleAddChoice}>
+        <button className="btn btn-outline-secondary btn-sm mt-2" onClick={handleAddScelta}>
           + Aggiungi scelta
         </button>
+      </div>
 
-        {localNode.choices.length === 0 && (
-          <div className='mt-2'>
-            <label className="form-label">Continua verso</label>
-            <select
-              className="form-select"
-              value={localNode.skipTo || ''}
-              onChange={(e) => {
-                const updated = { ...localNode, skipTo: e.target.value ? Number(e.target.value) : null }
-                setLocalNode(updated)
-                onUpdate(updated)
-              }}
-            >
+      <hr className="my-1" />
+
+      {/* Skip — solo se non ci sono scelte */}
+      {local.scelte.length === 0 && (
+        <div>
+          <label className="form-label fw-bold">Continua verso</label>
+          <select
+            className="form-select form-select-sm"
+            value={local.nextId || ''}
+            onChange={(e) => update({ ...local, nextId: e.target.value })}
+          >
             <option value="">Nessuno — fine dialogo</option>
-            {nodes
-              .filter(n => n.id !== localNode.id)
-              .map(n => (
-                <option key={n.id} value={n.id}>
-                  {n.char}: {n.text.slice(0, 20)}…
+            {dialoghi
+              .filter(d => d.id !== local.id)
+              .map(d => (
+                <option key={d.id} value={d.id}>
+                  {d.id} — {d.battute[0]?.testo.slice(0, 20)}…
                 </option>
               ))
             }
-            </select>
-          </div>
-        )}
-      </div>
+          </select>
+        </div>
+      )}
+
     </div>
   )
 }
