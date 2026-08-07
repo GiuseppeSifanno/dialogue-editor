@@ -12,15 +12,19 @@ Editor visuale per creare dialoghi per videogiochi.
 - Autosalvataggio
 
 ## Avvio
-\`\`\`bash
+```
+bash
+
 npm install
 npm run dev
-\`\`\`
+```
 
 ## Build
-\`\`\`bash
+```
+bash
+
 npm run build
-\`\`\`
+```
 
 ## Formato JSON
 Il formato esportato è compatibile con...
