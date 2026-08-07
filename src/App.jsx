@@ -11,6 +11,10 @@ function App() {
     setCurrentView('editor')
   }
 
+  function handleRename(newId) {
+    setAttoId(newId)
+  }
+
   function handleBack() {
     setAttoId(null)
     setCurrentView('home')
@@ -18,7 +22,7 @@ function App() {
 
   return currentView === 'home'
     ? <HomeScreen onOpen={handleOpenAtto} />
-    : <EditorScreen attoId={attoId} onBack={handleBack} />
+    : <EditorScreen attoId={attoId} onBack={handleBack} onRename={handleRename} />
 }
 
 export default App

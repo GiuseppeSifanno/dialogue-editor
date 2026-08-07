@@ -5,7 +5,7 @@ import Preview      from "../components/Preview"
 import ConfirmModal from "../components/modal/ConfirmModal"
 import * as bootstrap from 'bootstrap'
 
-function EditorScreen({ attoId, onBack }) {
+function EditorScreen({ attoId, onBack, onRename }) {
 
   const savedData   = localStorage.getItem(`atto:${attoId}`)
   const initialData = savedData ? JSON.parse(savedData) : {
@@ -109,13 +109,20 @@ function EditorScreen({ attoId, onBack }) {
 
   function handleSave() {
     const data = { meta, personaggi, dialoghi }
-    localStorage.setItem(`atto:${attoId}`, JSON.stringify(data))
+    localStorage.setItem(`atto:${meta.idAtto}`, JSON.stringify(data))
 
-    // aggiorna anche la lista atti
     const atti = JSON.parse(localStorage.getItem("atti") || "[]")
-    if (!atti.includes(attoId)) {
-      localStorage.setItem("atti", JSON.stringify([...atti, attoId]))
+    if (meta.idAtto !== attoId) {
+      localStorage.removeItem(`atto:${attoId}`)
+      const updated = atti.map(id => id === attoId ? meta.idAtto : id)
+      localStorage.setItem("atti", JSON.stringify(updated))
+      onRename(meta.idAtto)
+    } else {
+      if (!atti.includes(attoId)) {
+        localStorage.setItem("atti", JSON.stringify([...atti, attoId]))
+      }
     }
+
     alert("Salvato!")
   }
 
@@ -163,6 +170,28 @@ function EditorScreen({ attoId, onBack }) {
     input.setSelectionRange(1, 3)
   }
 
+  
+  function getOrfani(){
+    const raggiungibili = new Set()
+
+    if (meta.dialogoIniziale) 
+      raggiungibili.add(meta.dialogoIniziale)
+
+    dialoghi.forEach(d => {
+      d.scelte.forEach(s => {
+        if (s.next) raggiungibili.add(s.next)
+      })
+      if (d.nextId) raggiungibili.add(d.nextId)
+    })
+    // un dialogo è orfano se non è raggiungibile
+    return new Set(dialoghi
+      .map(d => d.id)
+      .filter(id => !raggiungibili.has(id))
+    )
+  }
+
+  const orfani = getOrfani()
+
   return (
     <div className="bg-dark min-vh-100 d-flex flex-column p-3 gap-3">
       <nav className="navbar navbar-expand-sm bg-body-tertiary rounded px-3">
@@ -209,9 +238,10 @@ function EditorScreen({ attoId, onBack }) {
       </nav>
 
       <div className="d-flex flex-column flex-sm-row gap-3 flex-grow-1">
-        <div className="d-flex flex-column gap-3" style={{ minWidth: '470px' }}>
+        <div className="d-flex flex-column gap-3">
           <NodeList
             meta={meta}
+            orfani={orfani}
             dialoghi={dialoghi}
             personaggi={personaggi}
             selectedId={selectedId}

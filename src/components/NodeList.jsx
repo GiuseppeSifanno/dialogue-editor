@@ -1,5 +1,5 @@
 function NodeList({
-  meta, dialoghi, personaggi, selectedId,
+  meta, orfani, dialoghi, personaggi, selectedId,
   onSelectDialogo, onAddDialogo, onDeleteDialogo, onChangeDialogoIniziale,
   onAddPersonaggio, onUpdatePersonaggio, onDeletePersonaggio, 
   openConfirm
@@ -66,9 +66,17 @@ function NodeList({
               className={`card p-2 ${dialogo.id === selectedId ? 'border-primary' : ''}`}
               style={{ background: dialogo.id === selectedId ? '#EEEDFE' : 'white', cursor: 'pointer' }}
             >
+              
               <div className="d-flex justify-content-between align-items-start">
                 <div className="flex-grow-1" onClick={() => onSelectDialogo(dialogo.id)}>
-                  <div className="text-muted small mb-1">{dialogo.id}</div>
+                  <div className="text-muted small mb-1 d-flex align-items-center gap-1">
+                    {dialogo.id}
+                    {orfani.has(dialogo.id) && (
+                      <span className="badge bg-warning text-dark" title="Dialogo non raggiungibile">
+                        orfano
+                      </span>
+                    )}
+                  </div>
                   {dialogo.battute.slice(0, 2).map((b, i) => (
                     <div key={i} className="small">
                       <span className="fw-bold">{getNome(b.personaggioId)}</span>
@@ -79,20 +87,20 @@ function NodeList({
                   {dialogo.battute.length > 2 && (
                     <div className="text-muted small">+{dialogo.battute.length - 2} battute</div>
                   )}
-                  <div className="d-flex">
-                    <div>
-                      <span className="fw-bold fst-italic">Scelte: </span>
-                    </div>
-                    <div className="ms-2">
-                      {dialogo.scelte.length > 0 && (
+                  {dialogo.scelte.length > 0 && (
+                    <div className="d-flex">
+                      <div>
+                        <span className="fw-bold fst-italic">Scelte: </span>
+                      </div>
+                      <div className="ms-2">
                         <div className="d-flex flex-wrap gap-1 mt-1">
                           {dialogo.scelte.map((s, i) => (
                             <span key={i} className="badge bg-secondary">{s.testo.slice(0, 20)}</span>
                           ))}
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="btn-group w-auto h-auto">
                   <button className="border-0 bg-transparent btn btn-sm" value={dialogo.id} 
